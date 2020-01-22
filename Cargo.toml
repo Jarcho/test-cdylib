@@ -1,0 +1,20 @@
+[package]
+name = "test-cdylib"
+version = "0.1.0"
+authors = ["Jason Newcomb <jsnewcomb@pm.me>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Jarcho/test-cdylib-rs"
+readme = "README.md"
+
+[workspace]
+members = ["test-self-as-cdylib"]
+
+[dependencies]
+serde = { version = "1.0.103", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.5.2"
+cargo_metadata = "0.9"
+
+[dev-dependencies]
+dlopen = "0.1.8"
