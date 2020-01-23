@@ -43,11 +43,7 @@ fn prepare(path: &Path) -> Result<Project> {
         dir: path!(target_dir / "cdylibs" / crate_name / test_name),
         source_dir,
         target_dir,
-        name: format!(
-            "{}-cdylib-{}",
-            crate_name,
-            test_name.to_string_lossy()
-        ),
+        name: format!("{}-cdylib-{}", crate_name, test_name.to_string_lossy()),
         features,
         workspace,
     };

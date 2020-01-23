@@ -40,6 +40,8 @@
 //! This will build the given file as a cdylib project, and return the path to
 //! the compiled library. All dependencies and dev-dependencies are available.
 
+#![forbid(unsafe_code)]
+
 use std::path::{Path, PathBuf};
 
 #[macro_use]
