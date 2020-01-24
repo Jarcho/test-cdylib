@@ -8,7 +8,7 @@
 //! ```no_run
 //! #[test]
 //! fn api_test() {
-//!     let dylib_path = test_cdylib::build_project();
+//!     let dylib_path = test_cdylib::build_current_project();
 //!
 //!     // Or load the shared library using any other method of your choice.
 //!     let dylib = dlopen::symbor::Library::open(&dylib_path).unwrap();
@@ -61,6 +61,6 @@ pub fn build_file<P: AsRef<Path>>(path: P) -> PathBuf {
 }
 
 /// Builds the current project as a cdylib and returns the path to the compiled object.
-pub fn build_project() -> PathBuf {
+pub fn build_current_project() -> PathBuf {
     cargo::build_self_cdylib().unwrap()
 }

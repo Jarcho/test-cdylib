@@ -1,5 +1,8 @@
 # test-cdylib
 
+![Build Status](https://github.com/Jarcho/test-cdylib/workflows/Continuous%20integration/badge.svg?branch=master&event=push)
+[![Rustc Version 1.31+](https://img.shields.io/badge/rustc-1.31+-lightgray.svg)](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
+
 test-cdylib is a library for dynamically linking to cdylib projects from
 test code. This allows testing for the existence of exported items.
 
@@ -13,7 +16,7 @@ A cdylib project can be tested like this:
 ```rust
 #[test]
 fn api_test() {
-    let dylib_path = test_cdylib::build_project();
+    let dylib_path = test_cdylib::build_current_project();
 
     // Or load the shared library using any other method of your choice.
     let dylib = dlopen::symbor::Library::open(&dylib_path).unwrap();

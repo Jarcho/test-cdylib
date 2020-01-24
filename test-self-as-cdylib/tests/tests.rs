@@ -1,6 +1,6 @@
 #[test]
 pub fn load_lib() {
-    let dylib = test_cdylib::build_project();
+    let dylib = test_cdylib::build_current_project();
     let dylib = dlopen::symbor::Library::open(&dylib)
         .expect(&format!("failed to open library: {}", dylib.display()));
     let identity = unsafe {
