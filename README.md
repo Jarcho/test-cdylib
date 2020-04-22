@@ -1,6 +1,8 @@
 # test-cdylib
 
-![Build Status](https://github.com/Jarcho/test-cdylib/workflows/Continuous%20integration/badge.svg?branch=master&event=push)
+![CI](https://github.com/Jarcho/test-cdylib/workflows/CI/badge.svg?branch=master&event=push)
+[![Latest Version](https://img.shields.io/crates/v/test-cdylib.svg)](https://crates.io/crates/test-cdylib)
+[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/test-cdylib)
 [![Rustc Version 1.31+](https://img.shields.io/badge/rustc-1.31+-lightgray.svg)](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
 
 test-cdylib is a library for dynamically linking to cdylib projects from
