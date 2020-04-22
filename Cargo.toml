@@ -15,6 +15,10 @@ readme = "README.md"
 [workspace]
 members = ["test-self-as-cdylib"]
 
+[[example]]
+name = "test_example"
+crate-type = ["cdylib"]
+
 [dependencies]
 serde = { version = "1.0.103", features = ["derive"] }
 serde_json = "1.0"

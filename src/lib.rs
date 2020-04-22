@@ -64,3 +64,8 @@ pub fn build_file<P: AsRef<Path>>(path: P) -> PathBuf {
 pub fn build_current_project() -> PathBuf {
     cargo::build_self_cdylib().unwrap()
 }
+
+/// Builds the given example as a cdylib and returns the path to the compiled object.
+pub fn build_example(name: &str) -> PathBuf {
+    cargo::build_example(name).unwrap()
+}

@@ -90,6 +90,45 @@ pub fn build_self_cdylib() -> Result<PathBuf> {
         .map(|a| a.filenames[0].clone())
 }
 
+pub fn build_example(name: &str) -> Result<PathBuf> {
+    let features = match features::find() {
+        Some(features) => vec![
+            "--no-default-features".to_owned(),
+            "--features".to_owned(),
+            features.join(","),
+        ],
+        None => vec![],
+    };
+
+    let mut cargo = raw_cargo();
+    rustflags::set_env(&mut cargo);
+    let result = cargo
+        .arg("build")
+        .arg("--example")
+        .arg(name)
+        .arg("--message-format=json")
+        .args(features)
+        .stderr(Stdio::inherit())
+        .output()
+        .map_err(Error::Cargo)?;
+
+    let mut artifact = None;
+    for message in cargo_metadata::parse_messages(result.stdout.as_slice()) {
+        match message? {
+            Message::CompilerMessage(m) => eprintln!("{}", m),
+            Message::CompilerArtifact(a) => artifact = Some(a),
+            _ => (),
+        }
+    }
+
+    if !result.status.success() {
+        return Err(Error::CargoFail);
+    }
+    artifact
+        .ok_or(Error::CargoFail)
+        .map(|a| a.filenames[0].clone())
+}
+
 pub fn metadata() -> Result<Metadata> {
     let output = raw_cargo()
         .arg("metadata")
