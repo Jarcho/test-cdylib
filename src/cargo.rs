@@ -1,7 +1,7 @@
 use cargo_metadata::Message;
 use serde::Deserialize;
 use std::path::PathBuf;
-use std::process::{Command, Stdio, Output};
+use std::process::{Command, Output, Stdio};
 
 use crate::error::{Error, Result};
 use crate::features;
@@ -20,7 +20,7 @@ fn raw_cargo() -> Command {
 
 fn cargo_build(features: &Option<Vec<String>>) -> Command {
     let mut cmd = raw_cargo();
-    cmd
+    cmd.arg("--offline")
         .arg("build")
         .arg("--message-format=json")
         .args(feature_args(features));
@@ -29,29 +29,35 @@ fn cargo_build(features: &Option<Vec<String>>) -> Command {
 }
 
 pub fn build_cdylib(project: &Project) -> Result<PathBuf> {
-    parse_output(cargo_build(&project.features)
-        .current_dir(&project.dir)
-        .env("CARGO_TARGET_DIR", path!(&project.dir / "target"))
-        .stderr(Stdio::inherit())
-        .output()
-        .map_err(Error::Cargo)?)
+    parse_output(
+        cargo_build(&project.features)
+            .current_dir(&project.dir)
+            .env("CARGO_TARGET_DIR", path!(&project.dir / "target"))
+            .stderr(Stdio::inherit())
+            .output()
+            .map_err(Error::Cargo)?,
+    )
 }
 
 pub fn build_self_cdylib() -> Result<PathBuf> {
-    parse_output(cargo_build(&features::find())
-        .arg("--lib")
-        .stderr(Stdio::inherit())
-        .output()
-        .map_err(Error::Cargo)?)
+    parse_output(
+        cargo_build(&features::find())
+            .arg("--lib")
+            .stderr(Stdio::inherit())
+            .output()
+            .map_err(Error::Cargo)?,
+    )
 }
 
 pub fn build_example(name: &str) -> Result<PathBuf> {
-    parse_output(cargo_build(&features::find())
-        .arg("--example")
-        .arg(name)
-        .stderr(Stdio::inherit())
-        .output()
-        .map_err(Error::Cargo)?)
+    parse_output(
+        cargo_build(&features::find())
+            .arg("--example")
+            .arg(name)
+            .stderr(Stdio::inherit())
+            .output()
+            .map_err(Error::Cargo)?,
+    )
 }
 
 pub fn parse_output(result: Output) -> Result<PathBuf> {
