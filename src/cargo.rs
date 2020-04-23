@@ -1,7 +1,7 @@
 use cargo_metadata::Message;
 use serde::Deserialize;
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use std::process::{Command, Stdio, Output};
 
 use crate::error::{Error, Result};
 use crate::features;
@@ -18,100 +18,43 @@ fn raw_cargo() -> Command {
     Command::new(option_env!("CARGO").unwrap_or("cargo"))
 }
 
-fn cargo(project: &Project) -> Command {
+fn cargo_build(features: &Option<Vec<String>>) -> Command {
     let mut cmd = raw_cargo();
-    cmd.current_dir(&project.dir);
-    cmd.env("CARGO_TARGET_DIR", path!(&project.dir / "target"));
+    cmd
+        .arg("build")
+        .arg("--message-format=json")
+        .args(feature_args(features));
     rustflags::set_env(&mut cmd);
     cmd
 }
 
 pub fn build_cdylib(project: &Project) -> Result<PathBuf> {
-    let result = cargo(project)
-        .arg("build")
-        .arg("--message-format=json")
-        .args(features(project))
+    parse_output(cargo_build(&project.features)
+        .current_dir(&project.dir)
+        .env("CARGO_TARGET_DIR", path!(&project.dir / "target"))
         .stderr(Stdio::inherit())
         .output()
-        .map_err(Error::Cargo)?;
-
-    let mut artifact = None;
-    for message in cargo_metadata::parse_messages(result.stdout.as_slice()) {
-        match message? {
-            Message::CompilerMessage(m) => eprintln!("{}", m),
-            Message::CompilerArtifact(a) => artifact = Some(a),
-            _ => (),
-        }
-    }
-
-    if !result.status.success() {
-        return Err(Error::CargoFail);
-    }
-    artifact
-        .ok_or(Error::CargoFail)
-        .map(|a| a.filenames[0].clone())
+        .map_err(Error::Cargo)?)
 }
 
 pub fn build_self_cdylib() -> Result<PathBuf> {
-    let features = match features::find() {
-        Some(features) => vec![
-            "--no-default-features".to_owned(),
-            "--features".to_owned(),
-            features.join(","),
-        ],
-        None => vec![],
-    };
-
-    let mut cargo = raw_cargo();
-    rustflags::set_env(&mut cargo);
-    let result = cargo
-        .arg("build")
+    parse_output(cargo_build(&features::find())
         .arg("--lib")
-        .arg("--message-format=json")
-        .args(features)
         .stderr(Stdio::inherit())
         .output()
-        .map_err(Error::Cargo)?;
-
-    let mut artifact = None;
-    for message in cargo_metadata::parse_messages(result.stdout.as_slice()) {
-        match message? {
-            Message::CompilerMessage(m) => eprintln!("{}", m),
-            Message::CompilerArtifact(a) => artifact = Some(a),
-            _ => (),
-        }
-    }
-
-    if !result.status.success() {
-        return Err(Error::CargoFail);
-    }
-    artifact
-        .ok_or(Error::CargoFail)
-        .map(|a| a.filenames[0].clone())
+        .map_err(Error::Cargo)?)
 }
 
 pub fn build_example(name: &str) -> Result<PathBuf> {
-    let features = match features::find() {
-        Some(features) => vec![
-            "--no-default-features".to_owned(),
-            "--features".to_owned(),
-            features.join(","),
-        ],
-        None => vec![],
-    };
-
-    let mut cargo = raw_cargo();
-    rustflags::set_env(&mut cargo);
-    let result = cargo
-        .arg("build")
+    parse_output(cargo_build(&features::find())
         .arg("--example")
         .arg(name)
-        .arg("--message-format=json")
-        .args(features)
         .stderr(Stdio::inherit())
         .output()
-        .map_err(Error::Cargo)?;
+        .map_err(Error::Cargo)?)
+}
 
+pub fn parse_output(result: Output) -> Result<PathBuf> {
     let mut artifact = None;
     for message in cargo_metadata::parse_messages(result.stdout.as_slice()) {
         match message? {
@@ -139,13 +82,13 @@ pub fn metadata() -> Result<Metadata> {
     serde_json::from_slice(&output.stdout).map_err(Error::Metadata)
 }
 
-fn features(project: &Project) -> Vec<String> {
-    match &project.features {
+fn feature_args(features: &Option<Vec<String>>) -> Vec<String> {
+    match features {
         Some(features) => vec![
             "--no-default-features".to_owned(),
             "--features".to_owned(),
             features.join(","),
         ],
-        None => vec![],
+        None => Vec::new(),
     }
 }
