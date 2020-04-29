@@ -18,10 +18,21 @@ fn raw_cargo() -> Command {
     Command::new(option_env!("CARGO").unwrap_or("cargo"))
 }
 
+fn cargo_supports_offline() -> bool {
+    raw_cargo()
+        .arg("--version")
+        .arg("--offline")
+        .output()
+        .ok()
+        .map_or(false, |res| res.status.success())
+}
+
 fn cargo_build(features: &Option<Vec<String>>) -> Command {
     let mut cmd = raw_cargo();
-    cmd.arg("--offline")
-        .arg("build")
+    if cargo_supports_offline() {
+        cmd.arg("--offline");
+    }
+    cmd.arg("build")
         .arg("--message-format=json")
         .args(feature_args(features));
     rustflags::set_env(&mut cmd);

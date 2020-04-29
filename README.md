@@ -76,6 +76,7 @@ library, e.g.
 
 ```rust
 use once_cell::sync::Lazy;
+use std::path::PathBuf;
 static LIB_PATH: Lazy<PathBuf> = Lazy::new(|| test_cdylib::build_current_project());
 ```
 

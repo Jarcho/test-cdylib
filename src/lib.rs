@@ -65,6 +65,7 @@
 //! library, e.g.
 //!
 //! ```rust
+//! use std::path::PathBuf;
 //! use once_cell::sync::Lazy;
 //! static LIB_PATH: Lazy<PathBuf> = Lazy::new(|| test_cdylib::build_current_project());
 //! ```
