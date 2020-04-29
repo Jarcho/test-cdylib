@@ -20,12 +20,28 @@
 //! This will build the current project, if it is not already built, and return
 //! the path to the compiled library.
 //!
-//! # Testing a cdylib building library
+//! ## Testing a cdylib building library
 //!
-//! Libraries that are meant to help create cdylib interfaces can be tested like
-//! this:
+//! Libraries that are meant to help create cdylib interfaces can be tested in two
+//! ways. First is to link to an example, e.g.
 //!
-//! ```no_run
+//! ```rust
+//! #[test]
+//! fn api_gen_test() {
+//!     let dylib_path = test_cdylib::build_example("example");
+//!
+//!     // Or load the shared library using any other method of your choice.
+//!     let dylib = dlopen::symbor::Library::open(&dylib_path).unwrap();
+//!
+//!     // Test the api as necessary.
+//! }
+//! ```
+//!
+//! This will build the example and return the path to the compiled library.
+//!
+//! The second way is to build a file as a cdylib, e.g.
+//!
+//! ```rust
 //! #[test]
 //! fn api_gen_test() {
 //!     let dylib_path = test_cdylib::build_path("tests/cdylib/api_test.rs");
@@ -38,7 +54,22 @@
 //! ```
 //!
 //! This will build the given file as a cdylib project, and return the path to
-//! the compiled library. All dependencies and dev-dependencies are available.
+//! the compiled library. All dependencies and dev-dependencies are available. Note
+//! that this will cause all dependencies to be rebuilt, which can slow down testing
+//! significantly.
+//!
+//! ## Multiple tests with the same library
+//!
+//! Multiple tests can link to the same library by using
+//! [once_cell](https://crates.io/crates/once_cell) to contain the path to the
+//! library, e.g.
+//!
+//! ```rust
+//! use once_cell::sync::Lazy;
+//! static LIB_PATH: Lazy<PathBuf> = Lazy::new(|| test_cdylib::build_current_project());
+//! ```
+//!
+//! The same can be done for both `build_example` and `build_path`.
 
 #![forbid(unsafe_code)]
 
